@@ -1,79 +1,77 @@
-from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, Float
-import os
-
+import json
+from flask import Flask, jsonify, request 
 
 app = Flask(__name__)
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'employees.db')
+
+class User:
+    def __init__(self, success, message, title):
+        self.success = success
+        self.message = message
+        self.title = title
+
+    @classmethod
+    def from_json(cls, json_string):
+        json_dict = json.loads(json_string)
+        return cls(**json_dict)
+
+    def __repr__(self):
+        return f'<User { self.success }>'
+
+json_string = '''{"success":true,
+    "message":"",
+    "title":null,
+    "object":{
+        "employee":{
+            "createdBy":"admin",
+            "createdAt":"1580757593333",
+            "version":0,
+            "lastModifiedBy":"admin",
+            "id":"5e387259a397a439bd5865be",
+            "systemId":"30",
+            "firstName":"PARAS LAMBA",
+            "fatherName":null,
+            "contact":"9555625312",
+            "secondaryContact":null,
+            "email":"paras.lamba@livpure.in",
+            "gender":"MALE",
+            "imageld":"",
+            "address":"Village Tosham, District Bhiwani Road, Tehsil Toasham, District Bhiwani",
+            "flatNo":null,
+            "landmark":null,
+            "city":null,
+            "locality":null,
+            "state":"",
+            "stateCode":null,
+            "region":null,
+            "country":"India",
+            "pincode":null,
+            "pincodeType":null,
+            "dob":null,
+            "location":null,
+            "username":"2001696",
+            "role":"CALL_CENTRE_ADMIN",
+            "status":"ACTIVE",
+            "qualification":"",
+            "language":"English/Hindi",
+            "experience":"",
+            "gstin":null,
+            "lastPasswordResetAt":null,
+            "profileImageUrl":null,
+            "stageTypes":["T0",
+                "T1",
+                "T2",
+                "T3"
+            ]
+        },
+        "authToken":"ebddebwbefbrhjfvhrfvevfevfejvrfjehrgfegrfe"
+    }
+}'''
+
+with open('data.json', 'r') as json_file:
+    print(json.loads(json_file.read()))
 
 
-db = SQLAlchemy(app)
-
-
-@app.cli.command('db_create')
-def db_create():
-    db.create_all()
-    print('Database created!')
-
-
-@app.cli.command('db_drop')
-def db_drop():
-    db.drop_all()
-    print('Database dropped!')
-
-
-@app.cli.command('db_seed')
-def db_seed():
-    employee1 = MockDB(createdBy = "admin",
-                       createdAt = 1580757593333,
-                       version = 0,
-                       lastModifiedBy = "admin",
-                       lastModifiedAt=1580757593333,
-                       firstName="PARAS LAMBA")
-
-    db.session.add(employee1)
-
-    test_user = User(first_name='Srishti',
-                     last_name='Gupta',
-                     email='srishtigupta0605@gmail.com',
-                     password='P@ssw0rd')
-
-    db.session.add(test_user)
-    db.session.commit()
-    print('Database seeded!')
-
-
-@app.route('/')
-def hello_world():
-    return 'Hello World!'
-
-
-@app.route('/not_found')
-def not_found():
-    return jsonify(message='That resource was not found'), 404
-
-
-# database models
-class User(db.Model):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    first_name = Column(String)
-    last_name = Column(String)
-    email = Column(String, unique=True)
-    password = Column(String)
-
-
-class MockDB(db.Model):
-    __tablename__ = 'employees'
-    createdBy = Column(String)
-    createdAt = Column(Integer)
-    version = Column(Integer)
-    lastModifiedBy = Column(String)
-    lastModifiedAt = Column(Integer)
-    firstName = Column(String,primary_key=True)
-
-
-if __name__ == '__main__':
-    app.run()
+@app.route('/endpoint1', methods=['POST'])
+def form_to_json():
+    data = request.form.to_dict(flat=False)
+    return jsonify(data)
