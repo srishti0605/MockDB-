@@ -9,9 +9,11 @@ from flask_mail import Mail, Message
 
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'employee.db')
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # change this IRL
 app.config['MAIL_SERVER'] = 'smtp.mailtrap.io'
+
 #app.config['MAIL_USERNAME'] = os.environ['MAIL_USERNAME']
 #app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
 
@@ -90,7 +92,7 @@ def login():
         access_token = create_access_token(identity=email)
         return jsonify(message="Login succeeded!", access_token=access_token)
     else:
-        return jsonify(message="Bad email or password"), 401
+        return jsonify(message="Incorrect email or password"), 401
 
 
 # database models
