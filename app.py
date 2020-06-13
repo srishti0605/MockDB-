@@ -1,35 +1,111 @@
 import json
 from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String, Float
+import os
+from flask_marshmallow import Marshmallow
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'employee.db')
+app.config['JWT_SECRET_KEY'] = 'super-secret'  # change this IRL
+app.config['MAIL_SERVER'] = 'smtp.mailtrap.io'
+#app.config['MAIL_USERNAME'] = os.environ['MAIL_USERNAME']
+#app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
 
-class User:
-    def __init__(self, success, message, title):
-        self.success = success
-        self.message = message
-        self.title = title
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
+jwt = JWTManager(app)
+mail = Mail(app)
 
-    @classmethod
-    def from_json(cls, json_string):
-        json_dict = json.loads(json_string)
-        return cls(**json_dict)
+@app.cli.command('db_create')
+def db_create():
+    db.create_all()
+    print('Database created!')
 
-    def __repr__(self):
-        return f'<User { self.success }>'
 
-json_string = ""
+@app.cli.command('db_drop')
+def db_drop():
+    db.drop_all()
+    print('Database dropped!')
+
+
+@app.cli.command('db_seed')
+def db_seed():
+
+    test_user = User(first_name='William',
+                     last_name='Herschel',
+                     email='test@test.com',
+                     password='P@ssw0rd')
+
+    db.session.add(test_user)
+    db.session.commit()
+    print('Database seeded!')
 
 
 @app.route('/')
 def welcome():
     with open('data.json', 'r') as json_file:
-        user_data = json.loads(json_file.read())
+        emp_data = json.loads(json_file.read())
 
-    print(user_data)
-    return jsonify(user_data)
+    print(emp_data)
+    return jsonify(emp_data)
 
 
 @app.route('/endpoint1', methods=['POST'])
 def form_to_json():
     data = request.form.to_dict(flat=False)
     return jsonify(data)
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    email = request.form['email']
+    test = User.query.filter_by(email=email).first()
+    if test:
+        return jsonify(message='That email already exists.'), 409
+    else:
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        password = request.form['password']
+        user = User(first_name=first_name, last_name=last_name, email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
+        return jsonify(message="User created successfully."), 201
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    if request.is_json:
+        email = request.json['email']
+        password = request.json['password']
+    else:
+        email = request.form['email']
+        password = request.form['password']
+
+    test = User.query.filter_by(email=email, password=password).first()
+    if test:
+        access_token = create_access_token(identity=email)
+        return jsonify(message="Login succeeded!", access_token=access_token)
+    else:
+        return jsonify(message="Bad email or password"), 401
+
+
+# database models
+class User(db.Model):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String)
+    last_name = Column(String)
+    email = Column(String, unique=True)
+    password = Column(String)
+
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'first_name', 'last_name', 'email', 'password')
+
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
