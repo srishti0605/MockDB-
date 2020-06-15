@@ -56,7 +56,7 @@ def welcome():
     return jsonify(emp_data)
 
 
-@app.route('/endpoint1', methods=['POST'])
+@app.route('/view_employers', methods=['POST'])
 def form_to_json():
     data = request.form.to_dict(flat=False)
     return jsonify(data)
