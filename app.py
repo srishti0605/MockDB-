@@ -64,7 +64,7 @@ def form_to_json():
 
     with open('data.json', 'w') as f:
         json.dump(y, f, indent=4)
-    return jsonify(data)
+    return jsonify(y[5])
 
 
 @app.route('/register', methods=['POST'])
