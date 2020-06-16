@@ -36,8 +36,8 @@ def db_drop():
 @app.cli.command('db_seed')
 def db_seed():
 
-    test_user = User(first_name='William',
-                     last_name='Herschel',
+    test_user = User(first_name='Srishti',
+                     last_name='Gupta',
                      email='test@test.com',
                      password='P@ssw0rd')
 
