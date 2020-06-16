@@ -1,26 +1,25 @@
 import json
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String
 import os
 from flask_marshmallow import Marshmallow
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token
-from flask_mail import Mail, Message
+from flask_jwt_extended import JWTManager, create_access_token
+
 
 app = Flask(__name__)
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'employee.db')
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # change this IRL
 app.config['MAIL_SERVER'] = 'smtp.mailtrap.io'
 
-#app.config['MAIL_USERNAME'] = os.environ['MAIL_USERNAME']
-#app.config['MAIL_PASSWORD'] = os.environ['MAIL_PASSWORD']
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 jwt = JWTManager(app)
-mail = Mail(app)
+
 
 @app.cli.command('db_create')
 def db_create():
@@ -53,12 +52,18 @@ def welcome():
         emp_data = json.loads(json_file.read())
 
     print(emp_data)
-    return jsonify(emp_data)
+    return jsonify(emp_data[1])
 
 
-@app.route('/view_employers', methods=['POST'])
+@app.route('/enter_employers', methods=['POST'])
 def form_to_json():
     data = request.form.to_dict(flat=False)
+    with open('data.json', 'r') as json_file:
+        y = json.load(json_file)
+        y.append(data)
+
+    with open('data.json', 'w') as f:
+        json.dump(y, f, indent=4)
     return jsonify(data)
 
 
@@ -103,6 +108,7 @@ class User(db.Model):
     last_name = Column(String)
     email = Column(String, unique=True)
     password = Column(String)
+
 
 class UserSchema(ma.Schema):
     class Meta:
