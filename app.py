@@ -165,7 +165,9 @@ def login():
     if test:
         access_token = create_access_token(identity=email)
         message = "Login succeeded!"
-        dictionary = {'message': message, 'access_token': access_token, 'firstName': test.firstName}
+        with open('data.json', 'r') as json_file:
+            emp_data = json.loads(json_file.read())
+        dictionary = {'success':True, 'message': message, 'title': None,'object':emp_data, 'authToken': access_token}
         return jsonify(dictionary)
     else:
         return jsonify(message="Incorrect email or password"), 401
