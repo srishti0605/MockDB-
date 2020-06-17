@@ -161,11 +161,11 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-    test = User.query.filter_by(email=email, password=password).first()
+    test = User.query.filter_by(email=email).first()
     if test:
         access_token = create_access_token(identity=email)
         message = "Login succeeded!"
-        dictionary = {'message': message, 'access_token': access_token}
+        dictionary = {'message': message, 'access_token': access_token, 'firstName': test.firstName}
         return jsonify(dictionary)
     else:
         return jsonify(message="Incorrect email or password"), 401
