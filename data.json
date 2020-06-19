@@ -11,7 +11,7 @@
     "secondaryContact": null,
     "email": "paras.lamba@livpure.in",
     "gender": "MALE",
-    "imageld": "",
+    "imageId": "",
     "address": "Village Tosham, District Bhiwani Road, Tehsil Toasham, District Bhiwani",
     "flatNo": null,
     "landmark": null,
@@ -33,7 +33,7 @@
     "experience": "",
     "gstin": null,
     "lastPasswordResetAt": null,
-    "profileImageUrl": null,
+    "profileImageUrl": "https://media-exp1.licdn.com/dms/image/C4D0BAQFydElmDOxoPA/company-logo_200_200/0?e=2159024400&v=beta&t=w0SFSLPeP8b0TsQhe97gfLK8ZuPU-onW3YHiYoKuEaE",
     "stageTypes": [
         "T0",
         "T1",
