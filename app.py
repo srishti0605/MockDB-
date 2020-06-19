@@ -83,10 +83,10 @@ def welcome():
         emp_data = json.loads(json_file.read())
 
     print(emp_data)
-    return jsonify(emp_data[1])
+    return jsonify(emp_data)
 
 
-@app.route('/enter_employers', methods=['POST'])
+@app.route('/enter_employees', methods=['POST'])
 def form_to_json():
     data = request.form.to_dict(flat=False)
     with open('data.json', 'r') as json_file:
@@ -105,54 +105,17 @@ def register():
     if test:
         return jsonify(message='That email already exists.'), 409
     else:
-        createdBy = request.form['createdBy']
-        createdAt = request.form['createdAt']
-        version = request.form['version']
-        lastModifiedBy = request.form['lastModifiedBy']
-        lastModifiedAt = request.form['lastModifiedAt']
-        id = request.form['id']
-        systemId = request.form['systemId']
-        firstName = request.form['firstName']
-        middleName = request.form['middleName']
-        lastName = request.form['lastName']
-        fullName = request.form['fullName']
-        fatherName = request.form['fatherName']
-        contact = request.form['contact']
-        secondaryContact = request.form['secondaryContact']
-        gender = request.form['gender']
-        imageId = request.form['imageId']
-        address = request.form['address']
-        flatNo = request.form['flatNo']
-        landmark = request.form['landmark']
-        city = request.form['city']
-        locality = request.form['locality']
-        district = request.form['district']
-        state = request.form['state']
-        stateCode = request.form['stateCode']
-        region = request.form['region']
-        country = request.form['country']
-        pincode = request.form['pincode']
-        pincodeType = request.form['pincodeType']
-        dob = request.form['dob']
-        location = request.form['location']
-        username = request.form['username']
-        role = request.form['role']
-        status = request.form['status']
-        qualification = request.form['qualification']
-        language = request.form['language']
-        experience = request.form['experience']
-        gstin = request.form['gstin']
-        lastPasswordResetAt = request.form['lastPasswordResetAt']
-        profileImageUrl = request.form['profileImageUrl']
-        stageTypes = request.form['stageTypes']
-        password = request.form['password']
-        user = User(createdBy=createdBy, createdAt=createdAt, version=version, lastModifiedBy=lastModifiedBy, lastModifiedAt=lastModifiedAt, id=id, systemId=systemId, firstName=firstName, middleName=middleName, lastName=lastName, fullName=fullName, fatherName=fatherName, contact=contact, secondaryContact=secondaryContact, email=email, gender=gender, imageId=imageId, address=address, flatNo=flatNo, landmark=landmark, city=city, locality=locality, district=district, state=state, stateCode=stateCode, region=region, country=country, pincode=pincode, pincodeType=pincodeType, dob=dob, location=location, username=username, role=role, status=status, qualification=qualification, language=language, experience=experience, gstin=gstin, lastPasswordResetAt=lastPasswordResetAt, profileImageUrl=profileImageUrl, stageTypes=stageTypes, password=password)
-        db.session.add(user)
-        db.session.commit()
+        data = request.form.to_dict()
+        with open('data.json', 'r') as json_file:
+            y = json.load(json_file)
+            y.update(data)
+        with open('data.json', 'w') as f:
+            json.dump(y, f, indent=4)
         return jsonify(message="User created successfully."), 201
 
 
 @app.route('/login', methods=['POST'])
+
 def login():
     if request.is_json:
         email = request.json['email']
@@ -167,7 +130,8 @@ def login():
         message = "Login succeeded!"
         with open('data.json', 'r') as json_file:
             emp_data = json.loads(json_file.read())
-        dictionary = {'success':True, 'message': message, 'title': None,'object':emp_data, 'authToken': access_token}
+        dictionary = {'success': True, 'message': message, 'title': None,
+                      'object': emp_data, 'authToken': access_token}
         return jsonify(dictionary)
     else:
         return jsonify(message="Incorrect email or password"), 401
