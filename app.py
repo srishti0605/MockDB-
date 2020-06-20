@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
 import os
 from flask_marshmallow import Marshmallow
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 
 
 app = Flask(__name__)
@@ -86,20 +86,10 @@ def welcome():
     return jsonify(emp_data)
 
 
-@app.route('/enter_employees', methods=['POST'])
-def form_to_json():
-    data = request.form.to_dict(flat=False)
-    with open('data.json', 'r') as json_file:
-        y = json.load(json_file)
-        y.append(data)
-
-    with open('data.json', 'w') as f:
-        json.dump(y, f, indent=4)
-    return jsonify(y[1])
-
-
 @app.route('/register', methods=['POST'])
+@jwt_required
 def register():
+
     email = request.form['email']
     test = User.query.filter_by(email=email).first()
     if test:
@@ -115,7 +105,6 @@ def register():
 
 
 @app.route('/login', methods=['POST'])
-
 def login():
     if request.is_json:
         email = request.json['email']
