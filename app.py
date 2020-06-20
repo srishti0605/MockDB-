@@ -36,6 +36,8 @@ def db_drop():
 
 @app.cli.command('db_seed')
 def db_seed():
+    credential = Credential(email='paras.lamba@livpure.in',
+                            password='password')
     user = User(createdBy='admin',
                 createdAt='1580757593333',
                 version=0,
@@ -74,6 +76,7 @@ def db_seed():
                 stageTypes='T0')
 
     db.session.add(user)
+    db.session.add(credential)
     db.session.commit()
     print('Database seeded!')
 
@@ -114,7 +117,7 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-    test = User.query.filter_by(email=email).first()
+    test = Credential.query.filter_by(email=email, password=password).first()
     if test:
         access_token = create_access_token(identity=email)
         message = "Login succeeded!"
@@ -176,6 +179,12 @@ class User(db.Model):
     lastPasswordResetAt = Column(String)
     profileImageUrl = Column(String)
     stageTypes = Column(String)
+    password = Column(String)
+
+
+class Credential(db.Model):
+    __tablename__ = 'credentials'
+    email = Column(String, primary_key=True)
     password = Column(String)
 
 
