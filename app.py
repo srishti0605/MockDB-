@@ -1,4 +1,5 @@
 import json
+import base64
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
@@ -86,7 +87,7 @@ def welcome():
     return jsonify(emp_data)
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/add_employee', methods=['POST'])
 @jwt_required
 def register():
 
@@ -117,9 +118,14 @@ def login():
     if test:
         access_token = create_access_token(identity=email)
         message = "Login succeeded!"
+
+        with open("static/0.jpg", "rb") as imageFile:
+            str1 = str(base64.b64encode(imageFile.read()))
+
         with open('data.json', 'r') as json_file:
             emp_data = json.loads(json_file.read())
-        dictionary = {'success': True, 'message': message, 'title': None,
+        dictionary = {'success': True, 'imgstring': str1,
+                      'message': message, 'title': None,
                       'object': emp_data, 'authToken': access_token}
         return jsonify(dictionary)
     else:
